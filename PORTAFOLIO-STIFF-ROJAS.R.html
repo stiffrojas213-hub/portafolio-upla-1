@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portafolio Académico & Gestor de Archivos | Stiff Angel Rojas Ruiz - UPLA</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js Syntax Highlighting CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#06b6d4',
+                            600: '#0284c7',
+                            900: '#0f172a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f1f5f9;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(6, 182, 212, 0.07) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, rgba(99, 102, 241, 0.07) 0%, transparent 40%);
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .card-clean {
+            background: rgba(22, 30, 46, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .card-clean:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+
+        pre[class*="language-"] {
+            margin: 0 !important;
+            border-radius: 0.5rem !important;
+            background: #090d16 !important;
+            font-size: 0.85rem !important;
+            line-height: 1.6 !important;
+        }
+
+        .dropzone-active {
+            border-color: #06b6d4 !important;
+            background: rgba(6, 182, 212, 0.1) !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-cyan-500 selection:text-white">
+
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="bg-gradient-to-tr from-cyan-500 to-indigo-600 text-white font-extrabold px-3.5 py-2 rounded-xl text-lg shadow-lg shadow-cyan-500/20">
+                    UPLA
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold text-slate-100 flex items-center gap-2">
+                        PORTAFOLIO DRIVE ACADÉMICO
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                            IV Ciclo
+                        </span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Taller de Desarrollo de Aplicaciones I · Ing. de Sistemas</p>
+                </div>
+            </div>
+
+            <!-- Global Quick Actions -->
+            <div class="flex items-center gap-3">
+                <button onclick="openCreateFolderModal()" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white transition flex items-center gap-2 border border-slate-700">
+                    <i class="fa-solid fa-folder-plus text-cyan-400"></i> <span class="hidden sm:inline">Nueva Carpeta</span>
+                </button>
+                <label for="fileUploadInput" class="cursor-pointer px-3.5 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 text-white hover:opacity-90 transition shadow-lg shadow-cyan-500/20 flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> <span>Subir Archivo</span>
+                </label>
+                <input type="file" id="fileUploadInput" class="hidden" multiple onchange="handleFileUpload(event)">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
+
+        <!-- Banner de Perfil Editable -->
+        <section class="glass-panel p-6 sm:p-8 rounded-2xl border border-slate-800 relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <!-- Avatar interactivo -->
+                <div class="relative group">
+                    <div id="avatarContainer" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-cyan-500 to-indigo-600 p-1 shadow-xl flex items-center justify-center overflow-hidden">
+                        <img id="profileImage" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80" alt="Foto de Perfil" class="w-full h-full object-cover rounded-xl" onerror="this.onerror=null; this.src='https://placehold.co/150x150/0284c7/ffffff?text=SR';">
+                    </div>
+                    <label for="profilePhotoInput" class="absolute -bottom-2 -right-2 bg-slate-900 border border-slate-700 text-cyan-400 hover:text-white p-2.5 rounded-xl cursor-pointer shadow-lg hover:scale-110 transition flex items-center justify-center" title="Cambiar Foto de Perfil">
+                        <i class="fa-solid fa-camera text-xs"></i>
+                    </label>
+                    <input type="file" id="profilePhotoInput" accept="image/*" class="hidden" onchange="updateProfilePhoto(event)">
+                </div>
+
+                <!-- Info Estudiante -->
+                <div class="flex-grow text-center sm:text-left space-y-2">
+                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                        <span class="px-2.5 py-0.5 rounded-md bg-cyan-500/10 text-cyan-400 text-xs font-semibold border border-cyan-500/20">
+                            Estudiante Universitario
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 text-xs font-semibold border border-indigo-500/20">
+                            UPLA - Huancayo
+                        </span>
+                    </div>
+
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                        STIFF ANGEL ROJAS RUIZ
+                    </h2>
+
+                    <p class="text-slate-400 text-xs sm:text-sm max-w-2xl">
+                        Escuela Profesional de Ingeniería de Sistemas y Computación · IV Ciclo · Asignatura: Taller de Desarrollo de Aplicaciones I (Taller VII).
+                    </p>
+
+                    <!-- Métricas de almacenamiento -->
+                    <div class="pt-3 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-300">
+                        <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-folder text-cyan-400"></i>
+                            <span>Carpetas: <strong id="statFolders" class="text-white">0</strong></span>
+                        </div>
+                        <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-file-code text-indigo-400"></i>
+                            <span>Archivos: <strong id="statFiles" class="text-white">0</strong></span>
+                        </div>
+                        <div class="bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-database text-emerald-400"></i>
+                            <span>Persistencia: <strong class="text-white">Nube / Local</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4" id="dropzoneArea">
+            <!-- Breadcrumbs & Search -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <!-- Navigation Breadcrumbs -->
+                <nav class="flex items-center flex-wrap gap-2 text-xs font-medium text-slate-400 w-full md:w-auto" id="breadcrumbsNav">
+                    <!-- Populated dynamically -->
+                </nav>
+
+                <!-- Search Input -->
+                <div class="relative w-full md:w-72">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar carpeta o archivo..." oninput="handleSearch()" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl pl-8 pr-4 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+                </div>
+            </div>
+
+            <!-- Drop Zone Banner (Drag and Drop Helper) -->
+            <div id="dragDropHint" class="hidden border-2 border-dashed border-slate-700 rounded-xl p-4 text-center text-xs text-slate-400 bg-slate-900/40">
+                <i class="fa-solid fa-cloud-arrow-up text-cyan-400 text-lg mb-1 block"></i>
+                Arrastra y suelta tus archivos aquí para subirlos a esta carpeta
+            </div>
+
+            <!-- Content Grid (Folder & Files Container) -->
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2" id="sectionTitle">
+                    <i class="fa-solid fa-folder-tree text-cyan-400"></i> Contenido de la Carpeta
+                </h3>
+                
+                <div id="explorerGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Dynamic rendering -->
+                </div>
+
+                <!-- Empty state -->
+                <div id="emptyFolderState" class="hidden py-12 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-full bg-slate-800/80 text-slate-500 flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-regular fa-folder-open"></i>
+                    </div>
+                    <p class="text-xs text-slate-400">Esta carpeta está vacía.</p>
+                    <div class="flex items-center justify-center gap-2 pt-1">
+                        <button onclick="openCreateFolderModal()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+                            <i class="fa-solid fa-folder-plus text-cyan-400 mr-1"></i> Crear Subcarpeta
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal: Viewer de Código / Documentos -->
+    <div id="codeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="glass-panel w-full max-w-4xl max-h-[85vh] rounded-2xl flex flex-col shadow-2xl border border-cyan-500/30 transform scale-95 transition-all duration-300" id="modalContainer">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-cyan-500/10 rounded-lg text-cyan-400" id="modalFileIconContainer">
+                        <i class="fa-solid fa-code text-base" id="modalFileIcon"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2" id="modalFileName">
+                            Archivo.java
+                        </h3>
+                        <p class="text-xs text-slate-400" id="modalFileMeta">Visor de código integrado</p>
+                    </div>
+                </div>
+                
+                <button onclick="closeModal('codeModal')" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body (Viewer) -->
+            <div class="p-5 overflow-y-auto flex-grow bg-slate-950/60" id="modalBodyViewer">
+                <div id="modalCodeHeader" class="flex items-center justify-between mb-3 text-xs text-slate-400">
+                    <span class="font-mono flex items-center gap-2">
+                        <i class="fa-solid fa-terminal text-cyan-400"></i> Código Fuente
+                    </span>
+                    <span id="codeLanguageTag" class="uppercase font-semibold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">JAVA</span>
+                </div>
+                
+                <!-- Code Area -->
+                <div id="codeViewerWrapper" class="relative">
+                    <pre><code id="modalCodeBlock" class="language-java"></code></pre>
+                </div>
+
+                <!-- Image Area -->
+                <div id="imageViewerWrapper" class="hidden flex justify-center items-center py-6">
+                    <img id="modalImageView" src="" alt="Vista Previa" class="max-h-[60vh] rounded-xl border border-slate-800 shadow-2xl object-contain">
+                </div>
+            </div>
+
+            <!-- Modal Footer (Actions) -->
+            <div class="px-6 py-4 border-t border-slate-800 bg-slate-900/90 rounded-b-2xl flex items-center justify-between gap-3">
+                <span class="text-xs text-slate-400 hidden sm:inline-flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i> Archivo guardado correctamente
+                </span>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <button id="btnCopyCode" onclick="copyModalCode()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 hover:bg-slate-700 transition flex items-center gap-2 border border-slate-700">
+                        <i class="fa-regular fa-copy"></i> Copiar
+                    </button>
+                    <button id="btnDownloadCode" onclick="downloadCurrentModalFile()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-cyan-500 to-indigo-600 text-white hover:opacity-90 transition shadow-lg shadow-cyan-500/20 flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Descargar
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal: Crear Carpeta -->
+    <div id="createFolderModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-800 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-folder-plus text-cyan-400"></i> Nueva Carpeta
+                </h3>
+                <button onclick="closeModal('createFolderModal')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div>
+                <label class="text-xs font-medium text-slate-400 block mb-1">Nombre de la carpeta:</label>
+                <input type="text" id="newFolderName" placeholder="Ej: Semana 17 - Laboratorio Extra" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeModal('createFolderModal')" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Cancelar</button>
+                <button onclick="confirmCreateFolder()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-bold">Crear Carpeta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Renombrar -->
+    <div id="renameModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl border border-slate-800 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-cyan-400"></i> Renombrar Elemento
+                </h3>
+                <button onclick="closeModal('renameModal')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div>
+                <label class="text-xs font-medium text-slate-400 block mb-1">Nuevo Nombre:</label>
+                <input type="text" id="renameInput" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeModal('renameModal')" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">Cancelar</button>
+                <button onclick="confirmRename()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-cyan-500 text-slate-950 hover:bg-cyan-400 font-bold">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 border border-cyan-500/40 text-slate-100 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <i class="fa-solid fa-circle-info text-cyan-400 text-base"></i>
+        <span id="toastMessage" class="text-xs font-medium">Notificación</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 glass-panel mt-12 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-center sm:text-left">
+                <p class="text-xs font-bold text-slate-200">Stiff Angel Rojas Ruiz</p>
+                <p class="text-xs text-slate-400">Ingeniería de Sistemas y Computación · UPLA</p>
+            </div>
+            <p class="text-xs text-slate-400">© Drive Académico - Taller de Desarrollo de Aplicaciones I</p>
+        </div>
+    </footer>
+
+    <!-- Prism JS for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+
+    <script>
+        // Initial Default Tree Structure
+        const initialDriveData = {
+            id: 'root',
+            name: 'Inicio',
+            type: 'folder',
+            children: [
+                {
+                    id: 'u1',
+                    name: 'Unidad 01 - Fundamentos Swing',
+                    type: 'folder',
+                    children: [
+                        {
+                            id: 'u1_w1',
+                            name: 'Semana 01 - JFrame e Inicialización',
+                            type: 'folder',
+                            children: [
+                                {
+                                    id: 'f_w1_1',
+                                    name: 'Principal.java',
+                                    type: 'file',
+                                    ext: 'java',
+                                    content: `package com.upla.aplicaciones;\n\nimport javax.swing.JFrame;\nimport javax.swing.SwingUtilities;\n\n/**\n * Estudiante: Stiff Angel Rojas Ruiz\n * Curso: Desarrollo de Aplicaciones I - UPLA\n */\npublic class Principal extends JFrame {\n    \n    public Principal() {\n        super("Sistema Académico UPLA - Stiff Rojas");\n        setSize(900, 600);\n        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\n        setLocationRelativeTo(null);\n    }\n\n    public static void main(String[] args) {\n        SwingUtilities.invokeLater(() -> {\n            new Principal().setVisible(true);\n        });\n    }\n}`
+                                }
+                            ]
+                        },
+                        { id: 'u1_w2', name: 'Semana 02 - Contenedores y Layouts', type: 'folder', children: [] },
+                        { id: 'u1_w3', name: 'Semana 03 - Menús Navegables JMenuBar', type: 'folder', children: [] },
+                        { id: 'u1_w4', name: 'Semana 04 - Formularios y Eventos', type: 'folder', children: [] }
+                    ]
+                },
+                {
+                    id: 'u2',
+                    name: 'Unidad 02 - Persistencia Local y Tablas',
+                    type: 'folder',
+                    children: [
+                        { id: 'u2_w5', name: 'Semana 05 - Archivos Planos I/O', type: 'folder', children: [] },
+                        { id: 'u2_w6', name: 'Semana 06 - Estilización Look and Feel', type: 'folder', children: [] },
+                        { id: 'u2_w7', name: 'Semana 07 - Tablas Dinámicas JTable', type: 'folder', children: [] },
+                        { id: 'u2_w8', name: 'Semana 08 - Validaciones y Diálogos Modales', type: 'folder', children: [] }
+                    ]
+                },
+                {
+                    id: 'u3',
+                    name: 'Unidad 03 - Base de Datos MySQL y JDBC',
+                    type: 'folder',
+                    children: [
+                        {
+                            id: 'u3_w9',
+                            name: 'Semana 09 - Conexión JDBC Singleton',
+                            type: 'folder',
+                            children: [
+                                {
+                                    id: 'f_w9_1',
+                                    name: 'ConexionBD.java',
+                                    type: 'file',
+                                    ext: 'java',
+                                    content: `package com.upla.aplicaciones.conexion;\n\nimport java.sql.Connection;\nimport java.sql.DriverManager;\nimport java.sql.SQLException;\n\npublic class ConexionBD {\n    private static final String URL = "jdbc:mysql://localhost:3306/db_upla_apps";\n    private static final String USER = "root";\n    private static final String PASS = "";\n\n    public static Connection getConexion() throws SQLException {\n        return DriverManager.getConnection(URL, USER, PASS);\n    }\n}`
+                                }
+                            ]
+                        },
+                        {
+                            id: 'u3_w10',
+                            name: 'Semana 10 - Diseño de Script SQL',
+                            type: 'folder',
+                            children: [
+                                {
+                                    id: 'f_w10_1',
+                                    name: 'Script_DB_UPLA.sql',
+                                    type: 'file',
+                                    ext: 'sql',
+                                    content: `-- Proyecto: Desarrollo de Aplicaciones I - UPLA\n-- Autor: Stiff Angel Rojas Ruiz\n\nCREATE DATABASE IF NOT EXISTS db_upla_apps;\nUSE db_upla_apps;\n\nCREATE TABLE estudiantes (\n    id_estudiante INT AUTO_INCREMENT PRIMARY KEY,\n    nombres VARCHAR(100) NOT NULL,\n    carrera VARCHAR(100) DEFAULT 'Ingeniería de Sistemas',\n    ciclo VARCHAR(10) DEFAULT 'IV Ciclo'\n);\n\nINSERT INTO estudiantes (nombres) VALUES ('Stiff Angel Rojas Ruiz');`
+                                }
+                            ]
+                        },
+                        { id: 'u3_w11', name: 'Semana 11 - PreparedStatement y DAO', type: 'folder', children: [] },
+                        { id: 'u3_w12', name: 'Semana 12 - Integración ResultSet JTable', type: 'folder', children: [] }
+                    ]
+                },
+                {
+                    id: 'u4',
+                    name: 'Unidad 04 - Sockets y Entrega Final',
+                    type: 'folder',
+                    children: [
+                        { id: 'u4_w13', name: 'Semana 13 - Comunicación Cliente Servidor TCP', type: 'folder', children: [] },
+                        { id: 'u4_w14', name: 'Semana 14 - Hilos y Programación Concurrente', type: 'folder', children: [] },
+                        { id: 'u4_w15', name: 'Semana 15 - Empaquetado Ejecutable JAR', type: 'folder', children: [] },
+                        {
+                            id: 'u4_w16',
+                            name: 'Semana 16 - Entrega e Informe Proyecto Final',
+                            type: 'folder',
+                            children: [
+                                {
+                                    id: 'f_w16_1',
+                                    name: 'README_PROYECTO_FINAL.txt',
+                                    type: 'file',
+                                    ext: 'txt',
+                                    content: "PROYECTO FINAL: SISTEMA DE GESTION ACADEMICA UPLA\n===================================================\nAlumno: Stiff Angel Rojas Ruiz\nCurso: Taller de Desarrollo de Aplicaciones I (Taller VII)\nCiclo: IV Ciclo - Ingeniería de Sistemas y Computación\nUniversidad Peruana Los Andes\n\nCaracterísticas:\n- GUI con Swing y Look and Feel plano.\n- Persistencia con MySQL JDBC.\n- Conexión cliente-servidor mediante Sockets TCP."
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Application State Variables
+        let driveTree = null;
+        let currentPath = ['root']; // ID Array for navigation path
+        let activeItemForRename = null;
+        let currentModalFile = null;
+
+        // Load & Save State to LocalStorage
+        function loadDriveData() {
+            const saved = localStorage.getItem('upla_drive_data_stiff');
+            if (saved) {
+                try {
+                    driveTree = JSON.parse(saved);
+                } catch (e) {
+                    driveTree = JSON.parse(JSON.stringify(initialDriveData));
+                }
+            } else {
+                driveTree = JSON.parse(JSON.stringify(initialDriveData));
+            }
+
+            const savedAvatar = localStorage.getItem('upla_avatar_stiff');
+            if (savedAvatar) {
+                document.getElementById('profileImage').src = savedAvatar;
+            }
+        }
+
+        function saveDriveData() {
+            localStorage.setItem('upla_drive_data_stiff', JSON.stringify(driveTree));
+            updateMetrics();
+        }
+
+        // Get Folder Node by Path Array
+        function getNodeByPath(pathArray) {
+            let current = driveTree;
+            for (let i = 1; i < pathArray.length; i++) {
+                const targetId = pathArray[i];
+                if (current.children) {
+                    const found = current.children.find(c => c.id === targetId);
+                    if (found) current = found;
+                }
+            }
+            return current;
+        }
+
+        // Update Drive Explorer UI Grid
+        function renderExplorer() {
+            const currentFolder = getNodeByPath(currentPath);
+            const grid = document.getElementById('explorerGrid');
+            const emptyState = document.getElementById('emptyFolderState');
+            const breadcrumbsNav = document.getElementById('breadcrumbsNav');
+
+            // Render Breadcrumbs Navigation
+            let breadcrumbsHTML = '';
+            let buildPath = [];
+            currentPath.forEach((id, idx) => {
+                buildPath.push(id);
+                const node = getNodeByPath(buildPath);
+                const isLast = idx === currentPath.length - 1;
+
+                if (isLast) {
+                    breadcrumbsHTML += `<span class="text-cyan-400 font-bold">${node.name}</span>`;
+                } else {
+                    const targetPathStr = JSON.stringify(buildPath);
+                    breadcrumbsHTML += `
+                        <button onclick='navigateToPath(${targetPathStr})' class="hover:text-white transition flex items-center gap-1">
+                            ${idx === 0 ? '<i class="fa-solid fa-house text-cyan-400"></i>' : ''} ${node.name}
+                        </button>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-600"></i>
+                    `;
+                }
+            });
+            breadcrumbsNav.innerHTML = breadcrumbsHTML;
+
+            // Render Items in Current Folder
+            grid.innerHTML = '';
+            const items = currentFolder.children || [];
+
+            if (items.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                
+                items.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card-clean p-4 rounded-xl flex flex-col justify-between space-y-3 group relative';
+
+                    if (item.type === 'folder') {
+                        const childCount = item.children ? item.children.length : 0;
+                        card.innerHTML = `
+                            <div class="cursor-pointer" onclick="openFolder('${item.id}')">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="w-10 h-10 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-lg border border-cyan-500/20">
+                                        <i class="fa-solid fa-folder"></i>
+                                    </div>
+                                    <span class="text-[11px] text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded font-mono">
+                                        ${childCount} elem.
+                                    </span>
+                                </div>
+                                <h4 class="text-xs font-bold text-slate-100 line-clamp-2">${item.name}</h4>
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-end gap-1">
+                                <button onclick="openRenameModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-cyan-400 transition text-xs" title="Renombrar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button onclick="deleteItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 transition text-xs" title="Eliminar">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        const fileIcon = getFileIconClass(item.ext);
+                        card.innerHTML = `
+                            <div class="cursor-pointer" onclick="openFileViewer('${item.id}')">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/20">
+                                        <i class="${fileIcon}"></i>
+                                    </div>
+                                    <span class="text-[10px] font-mono text-cyan-400 uppercase bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                                        ${item.ext || 'FILE'}
+                                    </span>
+                                </div>
+                                <h4 class="text-xs font-semibold text-slate-200 line-clamp-2">${item.name}</h4>
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1">
+                                <button onclick="openFileViewer('${item.id}')" class="text-[11px] text-cyan-400 hover:underline font-semibold flex items-center gap-1">
+                                    <i class="fa-solid fa-eye text-[10px]"></i> Ver
+                                </button>
+
+                                <div class="flex items-center gap-1">
+                                    <button onclick="downloadSingleFile('${item.id}')" class="p-1.5 text-slate-400 hover:text-cyan-400 transition text-xs" title="Descargar">
+                                        <i class="fa-solid fa-download"></i>
+                                    </button>
+                                    <button onclick="openRenameModal('${item.id}')" class="p-1.5 text-slate-400 hover:text-cyan-400 transition text-xs" title="Renombrar">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button onclick="deleteItem('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 transition text-xs" title="Eliminar">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    grid.appendChild(card);
+                });
+            }
+
+            updateMetrics();
+        }
+
+        // Folder Navigation
+        function openFolder(folderId) {
+            currentPath.push(folderId);
+            renderExplorer();
+        }
+
+        function navigateToPath(pathArr) {
+            currentPath = pathArr;
+            renderExplorer();
+        }
+
+        // Return appropriate icon class by extension
+        function getFileIconClass(ext) {
+            if (!ext) return 'fa-solid fa-file';
+            const e = ext.toLowerCase();
+            if (e === 'java') return 'fa-brands fa-java';
+            if (e === 'sql') return 'fa-solid fa-database';
+            if (e === 'txt' || e === 'md') return 'fa-solid fa-file-lines';
+            if (['png', 'jpg', 'jpeg', 'svg', 'gif'].includes(e)) return 'fa-solid fa-file-image';
+            if (e === 'pdf') return 'fa-solid fa-file-pdf';
+            return 'fa-solid fa-file-code';
+        }
+
+        // Open File Viewer Modal
+        function openFileViewer(fileId) {
+            const currentFolder = getNodeByPath(currentPath);
+            const file = currentFolder.children.find(c => c.id === fileId);
+            if (!file) return;
+
+            currentModalFile = file;
+
+            document.getElementById('modalFileName').textContent = file.name;
+            document.getElementById('modalFileMeta').textContent = `Ubicación: ${getNodeByPath(currentPath).name}`;
+            document.getElementById('codeLanguageTag').textContent = file.ext || 'TXT';
+
+            const iconContainer = document.getElementById('modalFileIcon');
+            iconContainer.className = getFileIconClass(file.ext);
+
+            const codeWrapper = document.getElementById('codeViewerWrapper');
+            const imageWrapper = document.getElementById('imageViewerWrapper');
+            const codeHeader = document.getElementById('modalCodeHeader');
+
+            const isImage = ['png', 'jpg', 'jpeg', 'svg', 'gif'].includes((file.ext || '').toLowerCase());
+
+            if (isImage) {
+                codeWrapper.classList.add('hidden');
+                codeHeader.classList.add('hidden');
+                imageWrapper.classList.remove('hidden');
+                document.getElementById('modalImageView').src = file.content;
+            } else {
+                imageWrapper.classList.add('hidden');
+                codeWrapper.classList.remove('hidden');
+                codeHeader.classList.remove('hidden');
+
+                const codeBlock = document.getElementById('modalCodeBlock');
+                codeBlock.className = `language-${file.ext === 'sql' ? 'sql' : 'java'}`;
+                codeBlock.textContent = file.content || '// Archivo sin contenido';
+
+                Prism.highlightElement(codeBlock);
+            }
+
+            openModal('codeModal');
+        }
+
+        // Upload File Handler
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            const currentFolder = getNodeByPath(currentPath);
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                const ext = file.name.split('.').pop();
+                const isImage = ['png', 'jpg', 'jpeg', 'svg', 'gif'].includes(ext.toLowerCase());
+
+                reader.onload = function(e) {
+                    const newFile = {
+                        id: 'f_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                        name: file.name,
+                        type: 'file',
+                        ext: ext,
+                        content: e.target.result
+                    };
+
+                    currentFolder.children.push(newFile);
+                    saveDriveData();
+                    renderExplorer();
+                    showToast(`Archivo "${file.name}" subido con éxito.`);
+                };
+
+                if (isImage) {
+                    reader.readAsDataURL(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            });
+
+            event.target.value = '';
+        }
+
+        // Profile Photo Change
+        function updateProfilePhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const dataUrl = e.target.result;
+                document.getElementById('profileImage').src = dataUrl;
+                localStorage.setItem('upla_avatar_stiff', dataUrl);
+                showToast("¡Foto de perfil actualizada!");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Create Folder Modal Logic
+        function openCreateFolderModal() {
+            document.getElementById('newFolderName').value = '';
+            openModal('createFolderModal');
+        }
+
+        function confirmCreateFolder() {
+            const nameInput = document.getElementById('newFolderName').value.trim();
+            if (!nameInput) {
+                showToast("Ingresa un nombre para la carpeta");
+                return;
+            }
+
+            const currentFolder = getNodeByPath(currentPath);
+            const newFolder = {
+                id: 'folder_' + Date.now(),
+                name: nameInput,
+                type: 'folder',
+                children: []
+            };
+
+            currentFolder.children.push(newFolder);
+            saveDriveData();
+            renderExplorer();
+            closeModal('createFolderModal');
+            showToast(`Carpeta "${nameInput}" creada.`);
+        }
+
+        // Rename Item Logic
+        function openRenameModal(itemId) {
+            const currentFolder = getNodeByPath(currentPath);
+            const item = currentFolder.children.find(c => c.id === itemId);
+            if (!item) return;
+
+            activeItemForRename = item;
+            document.getElementById('renameInput').value = item.name;
+            openModal('renameModal');
+        }
+
+        function confirmRename() {
+            const newName = document.getElementById('renameInput').value.trim();
+            if (!newName || !activeItemForRename) return;
+
+            activeItemForRename.name = newName;
+            saveDriveData();
+            renderExplorer();
+            closeModal('renameModal');
+            showToast("Nombre actualizado.");
+        }
+
+        // Delete Item Logic
+        function deleteItem(itemId) {
+            const currentFolder = getNodeByPath(currentPath);
+            const idx = currentFolder.children.findIndex(c => c.id === itemId);
+            if (idx !== -1) {
+                const removed = currentFolder.children.splice(idx, 1)[0];
+                saveDriveData();
+                renderExplorer();
+                showToast(`"${removed.name}" eliminado.`);
+            }
+        }
+
+        // Single File Download
+        function downloadSingleFile(fileId) {
+            const currentFolder = getNodeByPath(currentPath);
+            const file = currentFolder.children.find(c => c.id === fileId);
+            if (!file) return;
+
+            const blob = new Blob([file.content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.URL ? URL.createObjectURL(blob) : webkitURL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast(`Descargando ${file.name}...`);
+        }
+
+        function downloadCurrentModalFile() {
+            if (currentModalFile) {
+                downloadSingleFile(currentModalFile.id);
+            }
+        }
+
+        // Copy Code Text
+        function copyModalCode() {
+            if (!currentModalFile) return;
+            navigator.clipboard.writeText(currentModalFile.content).then(() => {
+                showToast("¡Código copiado al portapapeles!");
+            });
+        }
+
+        // Search Filter
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (!query) {
+                renderExplorer();
+                return;
+            }
+
+            const currentFolder = getNodeByPath(currentPath);
+            const grid = document.getElementById('explorerGrid');
+            grid.innerHTML = '';
+
+            const filtered = (currentFolder.children || []).filter(item => item.name.toLowerCase().includes(query));
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center text-xs text-slate-500 py-6">No se encontraron resultados para "${query}".</p>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card-clean p-4 rounded-xl flex items-center justify-between';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <i class="${item.type === 'folder' ? 'fa-solid fa-folder text-cyan-400' : getFileIconClass(item.ext) + ' text-indigo-400'} text-base"></i>
+                        <span class="text-xs font-semibold text-slate-200">${item.name}</span>
+                    </div>
+                    <button onclick="${item.type === 'folder' ? `openFolder('${item.id}')` : `openFileViewer('${item.id}')`}" class="text-xs text-cyan-400 hover:underline">
+                        Abrir
+                    </button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Metrics Calculator
+        function updateMetrics() {
+            let totalFolders = 0;
+            let totalFiles = 0;
+
+            function traverse(node) {
+                if (node.type === 'folder') {
+                    if (node.id !== 'root') totalFolders++;
+                    if (node.children) {
+                        node.children.forEach(traverse);
+                    }
+                } else {
+                    totalFiles++;
+                }
+            }
+
+            traverse(driveTree);
+
+            document.getElementById('statFolders').textContent = totalFolders;
+            document.getElementById('statFiles').textContent = totalFiles;
+        }
+
+        // Modal Helpers
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        // Toast Feedback
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // Setup Drag and Drop onto Explorer
+        function setupDragAndDrop() {
+            const area = document.getElementById('dropzoneArea');
+            const hint = document.getElementById('dragDropHint');
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                area.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    hint.classList.remove('hidden');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                area.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    hint.classList.add('hidden');
+                }, false);
+            });
+
+            area.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    const input = document.getElementById('fileUploadInput');
+                    input.files = files;
+                    handleFileUpload({ target: input });
+                }
+            });
+        }
+
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDriveData();
+            renderExplorer();
+            setupDragAndDrop();
+        });
+    </script>
+</body>
+</html>
